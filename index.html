@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Split your upcoming paycheck into needs, bills-due-before-next-pay, fun, and sinking pots — with an editable date-block timeline and safe-zero warnings. Local-first, no backend." />
+  <title>Paycheck Split Planner</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%B5%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <a class="skip-link" href="#paycheck">Skip to the planner</a>
+  <header>
+    <h1>Paycheck Split Planner</h1>
+    <p class="tagline">
+      Plan where your <strong>upcoming paycheck</strong> goes — before it lands.
+      Everything stays on this device. Nothing is uploaded anywhere.
+    </p>
+    <div class="header-actions">
+      <label class="toggle">
+        <input type="checkbox" id="large-print" />
+        Large print
+      </label>
+      <button type="button" id="reset-btn" class="btn btn-ghost">Start over</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="paycheck" class="card" aria-labelledby="step-1">
+      <h2 id="step-1"><span class="step-num">1</span> The paycheck</h2>
+      <div class="fields">
+        <div class="field">
+          <label for="amount">Amount (this check)</label>
+          <div class="money-input">
+            <span aria-hidden="true">$</span>
+            <input id="amount" name="amount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="1600.00" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="pay-text">Upcoming pay date</label>
+          <input id="payDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="nextPayDate">Next pay date (after this one)</label>
+          <input id="nextPayDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="blockSize">Timeline blocks</label>
+          <select id="blockSize">
+            <option value="0">One block (full window)</option>
+            <option value="7">Weekly blocks</option>
+            <option value="3">Every 3 days</option>
+            <option value="14">Every 2 weeks</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="step-2">
+      <h2 id="step-2"><span class="step-num">2</span> The split</h2>
+      <p class="hint">Percent of this check. It's fine to leave room — whatever doesn't add to 100% shows as "left to allocate."</p>
+      <div class="split-grid" id="split-grid"><!-- percent rows rendered by app.js --></div>
+      <div class="preset-row">
+        <span>Presets:</span>
+        <button type="button" class="btn btn-small preset" data-preset="50,25,15,10">Starter 50/25/15/10</button>
+        <button type="button" class="btn btn-small preset" data-preset="25,25,25,25">Even 25s</button>
+        <button type="button" class="btn btn-small preset" data-preset="60,25,10,5">Bills heavy 60/25/10/5</button>
+      </div>
+      <table class="totals-table" aria-label="Split totals">
+        <thead>
+          <tr><th scope="col">Bucket</th><th scope="col">%</th><th scope="col">This check gets</th></tr>
+        </thead>
+        <tbody id="split-totals"><!-- rows rendered by app.js --></tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">Left to allocate</th>
+            <td id="leftover-pct">0%</td>
+            <td><strong id="leftover">$0.00</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <section class="card" aria-labelledby="step-3">
+      <h2 id="step-3"><span class="step-num">3</span> Bills due before the next check</h2>
+      <p class="hint">List what must be paid between the upcoming pay date and the next one. Anything outside that window still shows on the timeline — it just isn't this check's job.</p>
+      <div class="rows" id="bills-rows"><!-- rows rendered by app.js --></div>
+      <button type="button" class="btn" id="add-bill">+ Add a bill</button>
+      <p class="subtotal">Due before next pay: <strong id="due-total">$0.00</strong>
+        <span id="due-status" class="status" role="status"></span></p>
+    </section>
+
+    <section class="card" aria-labelledby="step-4">
+      <h2 id="step-4"><span class="step-num">4</span> Sinking pots</h2>
+      <p class="hint">Pots save up over several checks for known-but-not-monthly stuff: tires, holidays, vet visits, license renewals.</p>
+      <div class="rows" id="pot-rows"><!-- rows rendered by app.js --></div>
+      <button type="button" class="btn" id="add-pot">+ Add a pot</button>
+      <p class="subtotal">Pots this check: <strong id="pots-total">$0.00</strong>
+        <span id="pots-status" class="status" role="status"></span></p>
+    </section>
+
+    <section class="card" aria-labelledby="step-5">
+      <h2 id="step-5"><span class="step-num">5</span> Date-block timeline</h2>
+      <div class="hint-row">
+        <p class="hint">Each block is an editable span of dates. Change labels and dates to fit how you actually live — every block shows the bills landing inside it.</p>
+        <button type="button" class="btn btn-small" id="rebuild-blocks">Rebuild from pay dates</button>
+      </div>
+      <div class="timeline" id="timeline"><!-- blocks rendered by app.js --></div>
+      <p class="empty-note" id="timeline-empty">Set both pay dates above to see the timeline.</p>
+    </section>
+
+    <section class="card" aria-labelledby="step-6">
+      <h2 id="step-6"><span class="step-num" aria-hidden="true">✓</span> Warnings &amp; quick math</h2>
+      <p class="hint">Safe-zero policy: an empty or zero plan is fine. Only true over-spend problems (negatives and over-allocations) get flagged.</p>
+      <ul id="warnings" class="warnings" aria-live="polite"></ul>
+      <div class="data-row">
+        <button type="button" class="btn btn-small" id="export-btn">Copy plan as JSON</button>
+        <button type="button" class="btn btn-small" id="export-download">Download plan (JSON)</button>
+        <button type="button" class="btn btn-small" id="clear-btn">Clear saved data</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Paycheck Split Planner — local-first and offline. Your numbers live in this browser's
+      localStorage and never leave it. By <a href="https://dylanasdale.github.io">Asdale Dynamics, LLC</a>.
+      This is budgeting math, not financial advice.
+    </p>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

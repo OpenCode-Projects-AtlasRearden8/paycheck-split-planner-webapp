@@ -1,0 +1,25 @@
+{
+  "name": "paycheck-split-planner-webapp",
+  "version": "1.0.0",
+  "description": "Static webapp that splits an upcoming paycheck into needs, bills-due-before-next-pay, fun, and sinking pots — local-first, large-print friendly.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/",
+    "start": "npx --yes serve .",
+    "check": "node --check split.js && node --check app.js"
+  },
+  "keywords": [
+    "budgeting",
+    "paycheck",
+    "sinking-fund",
+    "local-first",
+    "personal-finance",
+    "ADHD-friendly",
+    "static-webapp"
+  ],
+  "author": "Asdale Dynamics, LLC",
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "^28.1.0"
+  }
+}
